@@ -43,6 +43,8 @@ from econ_downturn import (
     setup_logger, load_environment, get_data_paths, get_output_paths
 )
 
+# Note: Visualization fixes are now integrated directly into plotting.py functions
+
 def setup_notebook():
     """
     Set up the notebook environment with common configurations.
@@ -163,3 +165,113 @@ def save_figure(fig, filename, output_dir=None):
     output_path = os.path.join(output_dir, filename)
     fig.savefig(output_path, dpi=100, bbox_inches='tight')
     print(f"Saved figure to {output_path}")
+
+
+def create_fixed_plots(data, indicators=None):
+    """
+    Create properly formatted plots using the integrated visualization fixes.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Raw data to plot
+    indicators : dict, optional
+        Dictionary of indicators to plot {indicator_name: ylabel}. If None, plots key indicators.
+
+    Returns
+    -------
+    bool
+        True if plots were created successfully
+    """
+    if data is None or data.empty:
+        print("Cannot create plots: No data provided")
+        return False
+
+    # Define default indicators if none provided
+    if indicators is None:
+        indicators = {
+            'GDP': 'Gross Domestic Product',
+            'UNEMPLOYMENT': 'Unemployment Rate (%)',
+            'CPI': 'Consumer Price Index',
+            'FED_FUNDS': 'Federal Funds Rate (%)'
+        }
+
+    print(f"Creating plots for {len(indicators)} indicators...")
+
+    # Create plots for each indicator (preprocessing happens automatically)
+    for indicator, ylabel in indicators.items():
+        if indicator in data.columns:
+            print(f"Creating plot for {indicator}...")
+
+            # Create the plot using the integrated plotting function (with automatic preprocessing)
+            fig = plot_indicator_with_recessions(
+                data,
+                indicator,
+                title=f"{ylabel} with Recession Periods",
+                ylabel=ylabel,
+                preprocess=True  # This enables automatic data preprocessing
+            )
+
+            if fig is not None:
+                # Display the plot
+                plt.show()
+
+                # Save the figure
+                filename = f"{indicator.lower()}_over_time.png"
+                save_figure(fig, filename)
+
+                # Close the figure to free memory
+                plt.close(fig)
+            else:
+                print(f"✗ Failed to create plot for {indicator}")
+        else:
+            print(f"⚠ Indicator '{indicator}' not found in data")
+
+    return True
+
+
+def create_fixed_correlations(data):
+    """
+    Create properly formatted correlation plots using the integrated visualization fixes.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Raw data to analyze
+
+    Returns
+    -------
+    bool
+        True if correlation plots were created successfully
+    """
+    if data is None or data.empty:
+        print("Cannot create correlation plots: No data provided")
+        return False
+
+    print("Creating correlation plots...")
+
+    # Create correlation matrix (preprocessing happens automatically)
+    print("Creating correlation matrix...")
+    fig = plot_correlation_matrix(data, preprocess=True)
+    if fig is not None:
+        plt.show()
+        save_figure(fig, "correlation_matrix.png")
+        plt.close(fig)
+    else:
+        print("✗ Failed to create correlation matrix")
+        return False
+
+    # Create recession correlations if recession column exists
+    if 'recession' in data.columns:
+        print("Creating recession correlations plot...")
+        fig = plot_recession_correlations(data, preprocess=True)
+        if fig is not None:
+            plt.show()
+            save_figure(fig, "recession_correlations.png")
+            plt.close(fig)
+        else:
+            print("✗ Failed to create recession correlations plot")
+    else:
+        print("⚠ Recession column not found - skipping recession correlations")
+
+    return True

@@ -23,9 +23,82 @@ plt.rcParams['figure.figsize'] = [12, 8]
 plt.rcParams['figure.dpi'] = 100
 
 
+def _preprocess_data_for_plotting(data):
+    """
+    Preprocess data to handle missing values and ensure consistent frequency for plotting.
+
+    This function addresses common issues that cause empty or broken plots:
+    - Mixed data frequencies (daily, monthly, etc.)
+    - Missing values that break plot continuity
+    - Data type inconsistencies
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Raw data to preprocess
+
+    Returns
+    -------
+    pandas.DataFrame
+        Preprocessed data suitable for plotting
+    """
+    if data is None or data.empty:
+        logger.warning("Empty data provided for preprocessing")
+        return data
+
+    # Convert to monthly frequency for consistency
+    # First, ensure the index is datetime
+    data_copy = data.copy()
+    data_copy.index = pd.to_datetime(data_copy.index)
+
+    # For each column, resample to monthly frequency
+    monthly_data = {}
+
+    for col in data_copy.columns:
+        # Skip columns with all NaN values
+        if data_copy[col].isna().all():
+            continue
+
+        # For economic indicators, use the last value of the month
+        if col in ['GDP', 'UNEMPLOYMENT', 'CPI', 'FED_FUNDS', 'YIELD_CURVE',
+                  'INDUSTRIAL_PROD', 'RETAIL_SALES', 'HOUSING_STARTS',
+                  'CONSUMER_SENTIMENT', 'SENTIMENT', 'INFLATION_1Y']:
+            # Resample to monthly frequency, using last value
+            series = data_copy[col].resample('M').last()
+
+        # For initial claims (weekly), use the mean of the month
+        elif col == 'INITIAL_CLAIMS':
+            series = data_copy[col].resample('M').mean()
+
+        # For recession indicator, use max (if any day in month is recession, month is recession)
+        elif col == 'recession':
+            series = data_copy[col].resample('M').max()
+
+        else:
+            # Default to last value
+            series = data_copy[col].resample('M').last()
+
+        monthly_data[col] = series
+
+    # Combine all series into a single DataFrame
+    monthly_df = pd.DataFrame(monthly_data)
+
+    # Forward fill missing values for economic indicators (carry forward last known value)
+    for col in monthly_df.columns:
+        if col != 'recession':  # Don't fill recession indicator
+            monthly_df[col] = monthly_df[col].fillna(method='ffill')
+
+    # Ensure recession column exists and is filled with 0 for NaN
+    if 'recession' in monthly_df.columns:
+        monthly_df['recession'] = monthly_df['recession'].fillna(0).astype(int)
+
+    logger.debug(f"Preprocessed data from {data.shape} to {monthly_df.shape}")
+    return monthly_df
+
+
 def plot_indicator_with_recessions(data, indicator_name, title=None, ylabel=None,
                                   recession_col='recession', figsize=(14, 8),
-                                  save_path=None):
+                                  save_path=None, preprocess=True):
     """
     Plot an economic indicator with recession periods shaded.
 
@@ -45,12 +118,23 @@ def plot_indicator_with_recessions(data, indicator_name, title=None, ylabel=None
         Figure size (width, height)
     save_path : str, optional
         Path to save the plot
+    preprocess : bool, optional
+        Whether to preprocess the data for consistent plotting (default: True)
 
     Returns
     -------
     matplotlib.figure.Figure
         The created figure
     """
+    # Preprocess data if requested
+    if preprocess:
+        data = _preprocess_data_for_plotting(data)
+
+    # Check if indicator exists in data
+    if indicator_name not in data.columns:
+        logger.error(f"Indicator '{indicator_name}' not found in data columns: {list(data.columns)}")
+        return None
+
     fig, ax = plt.subplots(figsize=figsize)
 
     # Plot the indicator
@@ -97,7 +181,7 @@ def plot_indicator_with_recessions(data, indicator_name, title=None, ylabel=None
     return fig
 
 
-def plot_correlation_matrix(data, figsize=(14, 12), annot=True, save_path=None):
+def plot_correlation_matrix(data, figsize=(14, 12), annot=True, save_path=None, preprocess=True):
     """
     Plot correlation matrix of the dataset.
 
@@ -111,12 +195,18 @@ def plot_correlation_matrix(data, figsize=(14, 12), annot=True, save_path=None):
         Whether to annotate the heatmap with correlation values
     save_path : str, optional
         Path to save the plot
+    preprocess : bool, optional
+        Whether to preprocess the data for consistent plotting (default: True)
 
     Returns
     -------
     matplotlib.figure.Figure
         The created figure
     """
+    # Preprocess data if requested
+    if preprocess:
+        data = _preprocess_data_for_plotting(data)
+
     # Calculate correlations
     correlation_matrix = data.corr()
 
@@ -135,7 +225,7 @@ def plot_correlation_matrix(data, figsize=(14, 12), annot=True, save_path=None):
     return fig
 
 
-def plot_recession_correlations(data, recession_col='recession', top_n=15, figsize=(12, 8), save_path=None):
+def plot_recession_correlations(data, recession_col='recession', top_n=15, figsize=(12, 8), save_path=None, preprocess=True):
     """
     Plot correlations of features with the recession indicator.
 
@@ -151,12 +241,18 @@ def plot_recession_correlations(data, recession_col='recession', top_n=15, figsi
         Figure size (width, height)
     save_path : str, optional
         Path to save the plot
+    preprocess : bool, optional
+        Whether to preprocess the data for consistent plotting (default: True)
 
     Returns
     -------
     matplotlib.figure.Figure
         The created figure
     """
+    # Preprocess data if requested
+    if preprocess:
+        data = _preprocess_data_for_plotting(data)
+
     if recession_col not in data.columns:
         logger.error(f"Recession column '{recession_col}' not found in the data")
         return None

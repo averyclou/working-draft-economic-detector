@@ -8,25 +8,29 @@ and merge them into a single dataset for analysis.
 import os
 import pandas as pd
 import logging
+from ..utils.config import get_data_paths
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
 
-def load_fred_data(file_path='data/fred/all_indicators.csv'):
+def load_fred_data(file_path=None):
     """
     Load FRED economic indicators data.
 
     Parameters
     ----------
-    file_path : str
-        Path to the CSV file with FRED data
+    file_path : str, optional
+        Path to the CSV file with FRED data. If None, uses default path from config.
 
     Returns
     -------
     pandas.DataFrame
         DataFrame with FRED economic indicators
     """
+    if file_path is None:
+        file_path = get_data_paths()['fred_all_indicators']
+
     if os.path.exists(file_path):
         data = pd.read_csv(file_path, index_col=0, parse_dates=True)
         logger.info(f"Loaded FRED data with shape: {data.shape}")
@@ -36,20 +40,23 @@ def load_fred_data(file_path='data/fred/all_indicators.csv'):
         return pd.DataFrame()
 
 
-def load_nber_data(file_path='data/nber/recession_indicator.csv'):
+def load_nber_data(file_path=None):
     """
     Load NBER recession indicator data.
 
     Parameters
     ----------
-    file_path : str
-        Path to the CSV file with NBER recession indicator
+    file_path : str, optional
+        Path to the CSV file with NBER recession indicator. If None, uses default path from config.
 
     Returns
     -------
     pandas.DataFrame
         DataFrame with recession indicator
     """
+    if file_path is None:
+        file_path = get_data_paths()['nber_recession_indicator']
+
     if os.path.exists(file_path):
         data = pd.read_csv(file_path, index_col=0, parse_dates=True)
         logger.info(f"Loaded NBER recession data with shape: {data.shape}")
@@ -59,20 +66,26 @@ def load_nber_data(file_path='data/nber/recession_indicator.csv'):
         return pd.DataFrame()
 
 
-def load_umich_data(file_path='data/umich/all_sentiment.csv'):
+def load_umich_data(file_path=None):
     """
     Load University of Michigan Consumer Sentiment data.
 
     Parameters
     ----------
-    file_path : str
-        Path to the CSV file with UMich data
+    file_path : str, optional
+        Path to the CSV file with UMich data. If None, uses default path from config.
 
     Returns
     -------
     pandas.DataFrame
         DataFrame with consumer sentiment data
     """
+    if file_path is None:
+        # UMich data path is not in the standard config, so we'll construct it
+        data_paths = get_data_paths()
+        base_dir = os.path.dirname(data_paths['fred_dir'])  # Get the data directory
+        file_path = os.path.join(base_dir, 'umich', 'all_sentiment.csv')
+
     if os.path.exists(file_path):
         data = pd.read_csv(file_path, index_col=0, parse_dates=True)
         logger.info(f"Loaded UMich data with shape: {data.shape}")
@@ -125,20 +138,23 @@ def merge_datasets(datasets, output_path=None):
     return merged_data
 
 
-def load_merged_data(file_path='data/processed/merged_data.csv'):
+def load_merged_data(file_path=None):
     """
     Load the merged dataset.
 
     Parameters
     ----------
-    file_path : str
-        Path to the CSV file with merged data
+    file_path : str, optional
+        Path to the CSV file with merged data. If None, uses default path from config.
 
     Returns
     -------
     pandas.DataFrame
         DataFrame with merged data
     """
+    if file_path is None:
+        file_path = get_data_paths()['merged_data']
+
     if os.path.exists(file_path):
         data = pd.read_csv(file_path, index_col=0, parse_dates=True)
         logger.info(f"Loaded merged data with shape: {data.shape}")
@@ -148,29 +164,30 @@ def load_merged_data(file_path='data/processed/merged_data.csv'):
         return pd.DataFrame()
 
 
-def get_all_data(fred_path='data/fred/all_indicators.csv',
-                nber_path='data/nber/recession_indicator.csv',
-                umich_path='data/umich/all_sentiment.csv',
-                output_path='data/processed/merged_data.csv'):
+def get_all_data(fred_path=None, nber_path=None, umich_path=None, output_path=None):
     """
     Convenience function to load and merge all data in one step.
 
     Parameters
     ----------
-    fred_path : str
-        Path to the CSV file with FRED data
-    nber_path : str
-        Path to the CSV file with NBER recession indicator
-    umich_path : str
-        Path to the CSV file with UMich consumer sentiment data
-    output_path : str
-        Path to save the merged dataset
+    fred_path : str, optional
+        Path to the CSV file with FRED data. If None, uses default path from config.
+    nber_path : str, optional
+        Path to the CSV file with NBER recession indicator. If None, uses default path from config.
+    umich_path : str, optional
+        Path to the CSV file with UMich consumer sentiment data. If None, uses default path from config.
+    output_path : str, optional
+        Path to save the merged dataset. If None, uses default path from config.
 
     Returns
     -------
     pandas.DataFrame
         Merged dataset
     """
+    # Get default paths if not provided
+    if output_path is None:
+        output_path = get_data_paths()['merged_data']
+
     # Load data from different sources
     fred_data = load_fred_data(fred_path)
     nber_data = load_nber_data(nber_path)
