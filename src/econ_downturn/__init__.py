@@ -15,6 +15,7 @@ from . import utils
 # Import key functions for easier access
 from .data.fred import get_fred_data
 from .data.nber import get_nber_data
+from .data.umich import get_umich_data
 from .data.data_loader import (
     get_all_data, load_merged_data, load_umich_data,
     load_fred_data, load_nber_data

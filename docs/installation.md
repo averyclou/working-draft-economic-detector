@@ -66,11 +66,28 @@ To obtain a FRED API key:
 
 The API key is required to access economic data from the FRED database, which is a primary data source for this project.
 
-### 5. Fetch the Data
+### 5. Collect the Data
 
-#### Option 1: Using Real Data (Recommended)
+#### Option 1: Using the Data Collection Notebook (Recommended)
 
-If you have a FRED API key, run the data acquisition scripts to fetch the economic indicators:
+If you have a FRED API key, we recommend using the comprehensive data collection notebook:
+
+```bash
+# Start Jupyter notebook
+jupyter notebook
+
+# Open and run notebooks/00_data_collection.ipynb
+# This will fetch all data sources:
+# - FRED economic indicators
+# - NBER recession data
+# - University of Michigan consumer sentiment
+# - Conference Board consumer confidence
+# - Business sentiment indicators
+```
+
+#### Option 2: Using Individual Scripts
+
+You can also run individual data collection scripts if preferred:
 
 ```bash
 # Fetch FRED data

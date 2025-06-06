@@ -35,6 +35,22 @@ This document provides descriptions of the economic indicators and datasets used
 | INFLATION_1Y | MICH1YR | University of Michigan: Inflation Expectation (1-Year) | Monthly | Percent |
 | INFLATION_5Y | MICH5YR | University of Michigan: Inflation Expectation (5-Year) | Monthly | Percent |
 
+## Additional Sentiment Data: Conference Board Consumer Confidence
+
+| Variable | FRED Series ID | Description | Frequency | Units |
+|----------|---------------|-------------|-----------|-------|
+| CONF_BOARD | CSCICP03USM665S | Conference Board Consumer Confidence Index | Monthly | Index 1985=100 |
+
+## Business Sentiment Indicators
+
+| Variable | FRED Series ID | Description | Frequency | Units |
+|----------|---------------|-------------|-----------|-------|
+| ISM_PMI | MANEMP | ISM Manufacturing PMI | Monthly | Index |
+| ISM_NONMFG | NMFBAI | ISM Non-Manufacturing Index | Monthly | Index |
+| BUS_OPTIMISM | NFCIBUSOPX | NFIB Small Business Optimism Index | Monthly | Index |
+| CEO_CONFIDENCE | CEOCONF | CEO Confidence Index | Quarterly | Index |
+| PHILLY_FED | USPHCI | Philadelphia Fed Business Outlook Survey | Monthly | Index |
+
 ## Derived Variables
 
 The following variables are derived from the primary economic indicators:
@@ -75,8 +91,16 @@ The following processed datasets are created during the analysis:
 - For indicators with higher frequency (daily, weekly), the last value of the month is used
 - For indicators with lower frequency (quarterly), the value is repeated for each month in the quarter
 
+## Data Coverage and Cutoff
+
+**Data Period**: January 1970 to May 2024
+**Data Cutoff Date**: May 2024
+
+All data collection is limited to May 2024 to ensure consistency across all indicators and provide a clear temporal boundary for the analysis. This timeframe encompasses 8 recession periods and multiple economic cycles, providing sufficient historical data for robust model training.
+
 ## Data Sources
 
 - Federal Reserve Economic Data (FRED): https://fred.stlouisfed.org/
 - National Bureau of Economic Research (NBER): https://www.nber.org/research/data/us-business-cycle-expansions-and-contractions
 - University of Michigan Surveys of Consumers: https://data.sca.isr.umich.edu/
+- Conference Board: https://www.conference-board.org/data/consumerconfidence.cfm

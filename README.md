@@ -21,7 +21,9 @@ This project aims to develop a predictive model to identify potential recessions
   - University of Michigan's Surveys of Consumers
   - Unemployment Rate data
 
-Our analysis covers economic data from **January 1970 to April 2025**, including historical data through May 2024 and forward-looking projections for key indicators. This timeframe encompasses 8 recession periods and multiple economic cycles.
+Our analysis covers economic data from **January 1970 to May 2024**, encompassing 8 recession periods and multiple economic cycles. This timeframe provides sufficient historical data for robust model training while ensuring the most recent economic conditions are captured.
+
+**Data Cutoff Date**: May 2024
 
 ### Key Findings
 
@@ -62,13 +64,21 @@ Our analytical approach encompassed:
   - `umich/`: University of Michigan Consumer Sentiment data
   - `processed/`: Processed datasets for analysis
 - `notebooks/`: Jupyter notebooks for analysis
+  - `00_data_collection.ipynb`: Comprehensive data collection from all sources
   - `01_data_exploration.ipynb`: Data exploration and visualization
   - `02_feature_engineering.ipynb`: Feature engineering and preprocessing
   - `03_multiple_discriminant_analysis.ipynb`: MDA modeling and evaluation
 - `src/`: Python modules and scripts
-  - `fetch_fred_data.py`: Script to fetch data from FRED API
-  - `fetch_nber_data.py`: Script to fetch NBER recession data
-  - `fetch_umich_data.py`: Script to fetch UMich Consumer Sentiment data
+  - `econ_downturn/`: Main package with all functionality
+    - `data/`: Data fetching and processing modules
+      - `fred.py`: Functions to fetch data from FRED API
+      - `nber.py`: Functions to fetch NBER recession data
+      - `umich.py`: Functions to fetch UMich Consumer Sentiment data
+    - `features/`: Feature engineering modules
+    - `models/`: Modeling and analysis modules
+    - `visualization/`: Data visualization modules
+  - `examples/`: Example scripts demonstrating package usage
+    - `run_analysis.py`: Complete analysis pipeline example
 - `docs/`: Project documentation
   - `installation.md`: Setup instructions
   - `data_dictionary.md`: Description of datasets and variables
@@ -79,6 +89,31 @@ Our analytical approach encompassed:
 See the [Installation Guide](docs/installation.md) for setup instructions.
 
 **Note:** This project requires a FRED API key to fetch economic data. You'll need to create an account on [FRED (Federal Reserve Economic Data)](https://fred.stlouisfed.org/), request an API key from your account settings, and add it to a `.env` file in the project root. See the installation guide for detailed instructions.
+
+### Data Collection
+To collect all economic data needed for analysis, we recommend using the comprehensive data collection notebook:
+
+```bash
+# Create a .env file with your FRED API key
+echo "FRED_API_KEY=your_api_key_here" > .env
+
+# Run the data collection notebook
+jupyter notebook notebooks/00_data_collection.ipynb
+```
+
+You can also fetch data programmatically using the package functions:
+
+```python
+from econ_downturn import get_fred_data, get_nber_data, get_umich_data, get_all_data
+
+# Fetch individual data sources
+fred_data = get_fred_data()
+nber_data = get_nber_data()
+umich_data = get_umich_data()
+
+# Or fetch all data sources at once
+merged_data = get_all_data()
+```
 
 ### Visualizations
 

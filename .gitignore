@@ -65,6 +65,7 @@ venv.bak/
 *.swo
 
 # Project specific
+data-*/
 data/fred/*
 data/nber/*
 data/umich/*

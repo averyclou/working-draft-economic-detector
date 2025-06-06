@@ -6,6 +6,7 @@ This directory contains Jupyter notebooks for analyzing economic indicators and 
 
 The notebooks follow a logical progression:
 
+0. **00_data_collection.ipynb**: Comprehensive data collection from all sources including FRED, NBER, University of Michigan, Conference Board, and business sentiment indicators
 1. **01_data_exploration.ipynb**: Explores the economic indicators data and their relationships with recession periods
 2. **02_feature_engineering.ipynb**: Creates lag variables and other features to capture leading indicators
 3. **03_multiple_discriminant_analysis.ipynb**: Applies MDA to identify the most significant predictors of recessions
@@ -21,10 +22,23 @@ The notebooks have been optimized to follow the DRY (Don't Repeat Yourself) prin
 
 ## How to Use
 
-1. Start by running the notebooks in order (01 → 05)
-2. Each notebook builds on the previous ones, so it's important to follow the sequence
-3. Use the `notebook_utils.py` module for common functionality
-4. For custom analysis, import specific functions from the `econ_downturn` package
+1. **Start with data collection**: Run `00_data_collection.ipynb` first to fetch all required data sources
+2. **Follow the sequence**: Run notebooks in order (00 → 05) as each builds on the previous ones
+3. **Use utility functions**: Leverage the `notebook_utils.py` module for common functionality
+4. **Custom analysis**: Import specific functions from the `econ_downturn` package for custom analysis
+
+## Data Collection (Notebook 00)
+
+The data collection notebook handles all data gathering tasks:
+
+- **FRED Economic Indicators**: GDP, unemployment, CPI, federal funds rate, yield curve, and other key economic metrics
+- **NBER Recession Data**: Official recession dates and indicators from the National Bureau of Economic Research
+- **University of Michigan Sentiment**: Consumer sentiment, expectations, and inflation expectations
+- **Conference Board Data**: Consumer confidence index
+- **Business Sentiment**: ISM PMI, NFIB optimism, CEO confidence, Philadelphia Fed survey
+- **Data Integration**: Combines all sources into a comprehensive dataset ready for analysis
+
+**Data Cutoff**: May 2024 - All data collection is limited to this date to ensure consistency across all indicators.
 
 ## Utility Functions
 
