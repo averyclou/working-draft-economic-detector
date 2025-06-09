@@ -260,12 +260,33 @@ def plot_recession_correlations(data, recession_col='recession', top_n=15, figsi
     # Calculate correlations with recession
     recession_corr = data.corr()[recession_col].sort_values(ascending=False)
 
-    # Select top correlated features
-    top_corr = recession_corr.drop(recession_col).head(top_n)
-    bottom_corr = recession_corr.drop(recession_col).tail(top_n)
+    # Remove the recession column itself from correlations
+    recession_corr = recession_corr.drop(recession_col)
 
-    # Combine top positive and negative correlations
-    combined_corr = pd.concat([top_corr, bottom_corr])
+    # Remove any NaN correlations
+    recession_corr = recession_corr.dropna()
+
+    # If we have fewer features than requested, adjust top_n
+    available_features = len(recession_corr)
+    if available_features == 0:
+        logger.error("No valid correlations found with recession indicator")
+        return None
+
+    # Adjust top_n if we don't have enough features
+    actual_top_n = min(top_n, available_features // 2)
+
+    # Select top positive and negative correlations without overlap
+    top_positive = recession_corr.head(actual_top_n)
+    top_negative = recession_corr.tail(actual_top_n)
+
+    # Remove any overlap between positive and negative (shouldn't happen but be safe)
+    top_negative = top_negative[~top_negative.index.isin(top_positive.index)]
+
+    # Combine correlations, ensuring no duplicates
+    combined_corr = pd.concat([top_positive, top_negative])
+
+    # Sort by absolute correlation value for better visualization
+    combined_corr = combined_corr.reindex(combined_corr.abs().sort_values(ascending=True).index)
 
     # Plot correlations
     fig = plt.figure(figsize=figsize)
@@ -275,14 +296,17 @@ def plot_recession_correlations(data, recession_col='recession', top_n=15, figsi
     ax.axvline(x=0, color='black', linestyle='-', alpha=0.3)
 
     # Color positive and negative correlations differently
-    for i, corr in enumerate(combined_corr):
-        if corr > 0:
-            ax.patches[i].set_facecolor('red')
-        else:
-            ax.patches[i].set_facecolor('blue')
+    # Use enumerate to ensure we don't go out of bounds
+    for i, (_, corr) in enumerate(combined_corr.items()):
+        if i < len(ax.patches):  # Safety check
+            if corr > 0:
+                ax.patches[i].set_facecolor('red')
+            else:
+                ax.patches[i].set_facecolor('blue')
 
     plt.title(f'Top Correlations with Recession', fontsize=16)
     plt.xlabel('Correlation Coefficient', fontsize=12)
+    plt.ylabel('Economic Indicators', fontsize=12)
     plt.tight_layout()
 
     # Save the plot if save_path is provided
@@ -617,7 +641,7 @@ def plot_sentiment_correlation_matrix(data, sentiment_cols=None, top_n=10, figsi
         ax.axvline(x=0, color='black', linestyle='-', alpha=0.3)
 
         # Color positive and negative correlations differently
-        for j, (idx, corr) in enumerate(top_corr.items()):
+        for j, (_, corr) in enumerate(top_corr.items()):
             if j < len(ax.patches):  # Make sure we don't go out of bounds
                 if corr > 0:
                     ax.patches[j].set_facecolor('green')
