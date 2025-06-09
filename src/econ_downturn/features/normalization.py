@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 def normalize_data(data, method='standard', target_col='recession'):
     """
     Normalize the features in the dataset.
-    
+
     Parameters
     ----------
     data : pandas.DataFrame
@@ -29,7 +29,7 @@ def normalize_data(data, method='standard', target_col='recession'):
         - 'minmax': MinMaxScaler (range [0, 1])
     target_col : str
         Name of the target column to exclude from normalization
-        
+
     Returns
     -------
     pandas.DataFrame
@@ -42,7 +42,25 @@ def normalize_data(data, method='standard', target_col='recession'):
         features = data.drop(columns=[target_col])
     else:
         features = data.copy()
-    
+
+    # Check for and handle infinite values
+    inf_mask = np.isinf(features).any(axis=1)
+    if inf_mask.any():
+        logger.warning(f"Found {inf_mask.sum()} rows with infinite values. Replacing with NaN.")
+        features = features.replace([np.inf, -np.inf], np.nan)
+
+    # Check for and handle NaN values
+    nan_mask = features.isnull().any(axis=1)
+    if nan_mask.any():
+        logger.warning(f"Found {nan_mask.sum()} rows with NaN values. Forward filling and backward filling.")
+        features = features.fillna(method='ffill').fillna(method='bfill')
+
+        # If there are still NaN values (e.g., entire columns are NaN), fill with 0
+        remaining_nan = features.isnull().any(axis=1)
+        if remaining_nan.any():
+            logger.warning(f"Still have {remaining_nan.sum()} rows with NaN after filling. Filling with 0.")
+            features = features.fillna(0)
+
     # Apply normalization
     if method == 'standard':
         scaler = StandardScaler()
@@ -51,20 +69,20 @@ def normalize_data(data, method='standard', target_col='recession'):
     else:
         logger.warning(f"Unknown method '{method}', using 'standard' instead")
         scaler = StandardScaler()
-    
+
     # Fit and transform the features
     features_normalized = pd.DataFrame(
         scaler.fit_transform(features),
         columns=features.columns,
         index=features.index
     )
-    
+
     # Add back the target
     if target is not None:
         features_normalized[target_col] = target
-    
+
     logger.info(f"Normalized data using {method} method, shape: {features_normalized.shape}")
-    
+
     return features_normalized, scaler
 
 

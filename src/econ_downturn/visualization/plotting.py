@@ -486,7 +486,7 @@ def plot_discriminant_time_series(discriminant_df, figsize=(14, 8), save_path=No
 
 
 def plot_sentiment_vs_indicator(data, sentiment_col='SENTIMENT', indicator_col=None,
-                               recession_col='recession', figsize=(14, 8), save_path=None):
+                               recession_col='recession', figsize=(14, 8), save_path=None, preprocess=True):
     """
     Plot consumer sentiment against an economic indicator with recession periods highlighted.
 
@@ -504,12 +504,18 @@ def plot_sentiment_vs_indicator(data, sentiment_col='SENTIMENT', indicator_col=N
         Figure size (width, height)
     save_path : str, optional
         Path to save the plot
+    preprocess : bool, optional
+        Whether to preprocess the data for consistent plotting (default: True)
 
     Returns
     -------
     matplotlib.figure.Figure
         The created figure
     """
+    # Preprocess data if requested
+    if preprocess:
+        data = _preprocess_data_for_plotting(data)
+
     if sentiment_col not in data.columns:
         logger.error(f"Sentiment column '{sentiment_col}' not found in the data")
         return None
