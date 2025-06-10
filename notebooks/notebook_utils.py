@@ -1,7 +1,7 @@
 """
 Utility functions for Jupyter notebooks.
 
-This module provides common imports, configurations, and helper functions
+This module provides a simple way to set up imports and common configurations
 for the economic downturn detector notebooks.
 """
 
@@ -14,110 +14,154 @@ import seaborn as sns
 from IPython.display import display, HTML
 import warnings
 
-# Add the parent directory to the path to import the econ_downturn package
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import from econ_downturn package
-from econ_downturn import (
-    # Data loading functions
-    get_fred_data, get_nber_data, get_all_data, load_merged_data,
-    load_umich_data, load_fred_data, load_nber_data,
+def init_notebook():
+    """Set up notebook environment and econ_downturn imports."""
+    print("Initializing notebook environment...")
 
-    # Feature engineering functions
-    engineer_features, normalize_data, apply_pca, prepare_data_for_modeling,
+    # Step 1: Set up econ_downturn imports
+    success = _setup_econ_downturn_imports()
+    if not success:
+        print("⚠ econ_downturn package setup failed - some functionality may be limited")
 
-    # Advanced feature engineering functions
-    engineer_features_with_custom_lags, create_interaction_terms,
-    apply_sentiment_transformations, select_features,
+    # Step 2: Configure notebook environment
+    _configure_notebook_environment()
 
-    # Model functions
-    apply_mda, create_discriminant_time_series,
+    # Step 3: Load environment variables and show paths
+    if success:
+        _load_environment_and_paths()
 
-    # Visualization functions
-    plot_indicator_with_recessions, plot_correlation_matrix,
-    plot_recession_correlations, plot_feature_importance,
-    plot_mda_projection, plot_discriminant_time_series,
-    plot_sentiment_vs_indicator, plot_sentiment_correlation_matrix,
+    print("✓ Notebook initialization complete!")
+    print("\nYou can now import econ_downturn functions directly:")
+    print("  from econ_downturn import get_all_data, plot_indicator_with_recessions")
 
-    # Utility functions
-    setup_logger, load_environment, get_data_paths, get_output_paths
-)
+    return success
 
-# Note: Visualization fixes are now integrated directly into plotting.py functions
 
-def setup_notebook():
-    """
-    Set up the notebook environment with common configurations.
-    """
-    # Set plotting style
-    plt.style.use('seaborn-v0_8-whitegrid')
-    sns.set_palette('deep')
-    plt.rcParams['figure.figsize'] = [12, 8]
-    plt.rcParams['figure.dpi'] = 100
+def _setup_econ_downturn_imports():
+    """Add src directory to Python path so we can import econ_downturn."""
+    try:
+        # First, try to import the package directly
+        import econ_downturn
+        print("✓ econ_downturn package already available")
+        return True
+    except ImportError:
+        pass
 
-    # Display all columns in pandas
-    pd.set_option('display.max_columns', None)
+    # Find the src directory
+    current_dir = os.path.abspath(os.getcwd())
+    notebook_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Suppress warnings
-    warnings.filterwarnings('ignore')
+    # Try different possible locations for the src directory
+    possible_src_paths = [
+        os.path.join(notebook_dir, '..', 'src'),  # From notebooks directory
+        os.path.join(current_dir, 'src'),         # From project root
+        os.path.join(current_dir, '..', 'src'),   # From subdirectory
+    ]
 
-    # Load environment variables
-    load_environment()
+    src_path = None
+    for path in possible_src_paths:
+        abs_path = os.path.abspath(path)
+        if os.path.exists(abs_path) and os.path.exists(os.path.join(abs_path, 'econ_downturn')):
+            src_path = abs_path
+            break
 
-    # Print setup message
-    print("Notebook environment set up successfully.")
-    print("Available data paths:")
-    for key, path in get_data_paths().items():
-        print(f"  {key}: {path}")
-    print("\nAvailable output paths:")
-    for key, path in get_output_paths().items():
-        print(f"  {key}: {path}")
+    if src_path is None:
+        print("✗ Could not find econ_downturn package")
+        return False
 
+    # Add to sys.path if not already there
+    if src_path not in sys.path:
+        sys.path.insert(0, src_path)
+        print(f"✓ Added {src_path} to Python path")
+
+    # Verify the import works
+    try:
+        import econ_downturn
+        print("✓ econ_downturn package imported successfully")
+        return True
+    except ImportError as e:
+        print(f"✗ Failed to import econ_downturn package: {e}")
+        return False
+
+
+def _configure_notebook_environment():
+    """Set up plotting styles and pandas options."""
+    try:
+        # Set plotting style
+        plt.style.use('seaborn-v0_8-whitegrid')
+        sns.set_palette('deep')
+        plt.rcParams['figure.figsize'] = [12, 8]
+        plt.rcParams['figure.dpi'] = 100
+
+        # Display all columns in pandas
+        pd.set_option('display.max_columns', None)
+
+        # Suppress warnings
+        warnings.filterwarnings('ignore')
+
+        print("✓ Notebook environment configured")
+
+    except Exception as e:
+        print(f"⚠ Could not configure environment: {e}")
+
+
+def _load_environment_and_paths():
+    """Load .env file and show data/output paths."""
+    try:
+        from econ_downturn import load_environment, get_data_paths, get_output_paths
+
+        # Load environment variables
+        load_environment()
+        print("✓ Environment variables loaded")
+
+        # Show available paths
+        print("\nAvailable data paths:")
+        for key, path in get_data_paths().items():
+            print(f"  {key}: {path}")
+        print("\nAvailable output paths:")
+        for key, path in get_output_paths().items():
+            print(f"  {key}: {path}")
+
+    except Exception as e:
+        print(f"⚠ Could not load environment/paths: {e}")
+
+
+# Convenience functions for common notebook operations
 def load_data(use_cached=True):
-    """
-    Load all data sources and merge them.
+    """Load merged dataset. Uses cached version if available."""
+    try:
+        from econ_downturn import get_all_data, load_merged_data, get_data_paths
 
-    Parameters
-    ----------
-    use_cached : bool
-        Whether to use cached data if available
+        # Get data paths
+        data_paths = get_data_paths()
 
-    Returns
-    -------
-    pandas.DataFrame
-        Merged dataset
-    """
-    # Get data paths
-    data_paths = get_data_paths()
+        # Check if merged data exists and use_cached is True
+        merged_data_path = data_paths.get('merged_data')
+        if use_cached and merged_data_path and os.path.exists(merged_data_path):
+            print(f"Loading cached merged data from {merged_data_path}")
+            merged_data = load_merged_data()
+            print(f"Loaded merged data with shape: {merged_data.shape}")
+            return merged_data
 
-    # Check if merged data exists and use_cached is True
-    merged_data_path = data_paths.get('merged_data')
-    if use_cached and merged_data_path and os.path.exists(merged_data_path):
-        print(f"Loading cached merged data from {merged_data_path}")
-        merged_data = load_merged_data()
-        print(f"Loaded merged data with shape: {merged_data.shape}")
-        return merged_data
+        # Otherwise, load and merge data from original sources
+        print("Loading data from original sources...")
+        merged_data = get_all_data()
 
-    # Otherwise, load and merge data from original sources
-    print("Loading data from original sources...")
-    merged_data = get_all_data()
+        if merged_data is not None and not merged_data.empty:
+            print(f"Loaded and merged data with shape: {merged_data.shape}")
+            return merged_data
+        else:
+            print("Failed to load data.")
+            return None
 
-    if merged_data is not None and not merged_data.empty:
-        print(f"Loaded and merged data with shape: {merged_data.shape}")
-        return merged_data
-    else:
-        print("Failed to load data.")
+    except Exception as e:
+        print(f"Error loading data: {e}")
         return None
 
-def display_data_info(data):
-    """
-    Display information about the dataset.
 
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        Dataset to analyze
-    """
+def display_data_info(data):
+    """Show dataset summary, stats, and missing values."""
     if data is None or data.empty:
         print("No data to display.")
         return
@@ -142,136 +186,31 @@ def display_data_info(data):
     })
     display(missing_df.sort_values('Missing Values', ascending=False))
 
+
 def save_figure(fig, filename, output_dir=None):
-    """
-    Save a figure to the output directory.
+    """Save plot to docs/images (or specified directory)."""
+    try:
+        from econ_downturn import get_output_paths
 
-    Parameters
-    ----------
-    fig : matplotlib.figure.Figure
-        Figure to save
-    filename : str
-        Filename for the figure
-    output_dir : str, optional
-        Output directory. If None, uses the default images directory.
-    """
-    if output_dir is None:
-        output_dir = get_output_paths()['images_dir']
+        if output_dir is None:
+            output_dir = get_output_paths()['images_dir']
 
-    # Create output directory if it doesn't exist
-    os.makedirs(output_dir, exist_ok=True)
+        # Create output directory if it doesn't exist
+        os.makedirs(output_dir, exist_ok=True)
 
-    # Save the figure
-    output_path = os.path.join(output_dir, filename)
-    fig.savefig(output_path, dpi=100, bbox_inches='tight')
-    print(f"Saved figure to {output_path}")
+        # Save the figure
+        output_path = os.path.join(output_dir, filename)
+        fig.savefig(output_path, dpi=100, bbox_inches='tight')
+        print(f"Saved figure to {output_path}")
+
+    except Exception as e:
+        print(f"Error saving figure: {e}")
 
 
-def create_fixed_plots(data, indicators=None):
-    """
-    Create properly formatted plots using the integrated visualization fixes.
-
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        Raw data to plot
-    indicators : dict, optional
-        Dictionary of indicators to plot {indicator_name: ylabel}. If None, plots key indicators.
-
-    Returns
-    -------
-    bool
-        True if plots were created successfully
-    """
-    if data is None or data.empty:
-        print("Cannot create plots: No data provided")
-        return False
-
-    # Define default indicators if none provided
-    if indicators is None:
-        indicators = {
-            'GDP': 'Gross Domestic Product',
-            'UNEMPLOYMENT': 'Unemployment Rate (%)',
-            'CPI': 'Consumer Price Index',
-            'FED_FUNDS': 'Federal Funds Rate (%)'
-        }
-
-    print(f"Creating plots for {len(indicators)} indicators...")
-
-    # Create plots for each indicator (preprocessing happens automatically)
-    for indicator, ylabel in indicators.items():
-        if indicator in data.columns:
-            print(f"Creating plot for {indicator}...")
-
-            # Create the plot using the integrated plotting function (with automatic preprocessing)
-            fig = plot_indicator_with_recessions(
-                data,
-                indicator,
-                title=f"{ylabel} with Recession Periods",
-                ylabel=ylabel,
-                preprocess=True  # This enables automatic data preprocessing
-            )
-
-            if fig is not None:
-                # Display the plot
-                plt.show()
-
-                # Save the figure
-                filename = f"{indicator.lower()}_over_time.png"
-                save_figure(fig, filename)
-
-                # Close the figure to free memory
-                plt.close(fig)
-            else:
-                print(f"✗ Failed to create plot for {indicator}")
-        else:
-            print(f"⚠ Indicator '{indicator}' not found in data")
-
-    return True
+# Legacy support functions for backward compatibility
+def setup_notebook():
+    """Legacy function - use init_notebook() instead."""
+    print("⚠ setup_notebook() is deprecated - use init_notebook() instead")
+    return init_notebook()
 
 
-def create_fixed_correlations(data):
-    """
-    Create properly formatted correlation plots using the integrated visualization fixes.
-
-    Parameters
-    ----------
-    data : pandas.DataFrame
-        Raw data to analyze
-
-    Returns
-    -------
-    bool
-        True if correlation plots were created successfully
-    """
-    if data is None or data.empty:
-        print("Cannot create correlation plots: No data provided")
-        return False
-
-    print("Creating correlation plots...")
-
-    # Create correlation matrix (preprocessing happens automatically)
-    print("Creating correlation matrix...")
-    fig = plot_correlation_matrix(data, preprocess=True)
-    if fig is not None:
-        plt.show()
-        save_figure(fig, "correlation_matrix.png")
-        plt.close(fig)
-    else:
-        print("✗ Failed to create correlation matrix")
-        return False
-
-    # Create recession correlations if recession column exists
-    if 'recession' in data.columns:
-        print("Creating recession correlations plot...")
-        fig = plot_recession_correlations(data, preprocess=True)
-        if fig is not None:
-            plt.show()
-            save_figure(fig, "recession_correlations.png")
-            plt.close(fig)
-        else:
-            print("✗ Failed to create recession correlations plot")
-    else:
-        print("⚠ Recession column not found - skipping recession correlations")
-
-    return True

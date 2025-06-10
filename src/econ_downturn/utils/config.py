@@ -9,14 +9,7 @@ from dotenv import load_dotenv
 
 
 def load_environment():
-    """
-    Load environment variables from .env file.
-
-    Returns
-    -------
-    dict
-        Dictionary of environment variables
-    """
+    """Load environment variables from .env file."""
     # Load environment variables from .env file
     load_dotenv()
 
@@ -34,14 +27,7 @@ def load_environment():
 
 
 def get_project_root():
-    """
-    Get the project root directory.
-
-    Returns
-    -------
-    str
-        Path to the project root directory
-    """
+    """Get the project root directory."""
     # Get the directory containing this file (src/econ_downturn/utils/)
     current_dir = os.path.dirname(os.path.abspath(__file__))
     # Go up three levels to get to project root: utils -> econ_downturn -> src -> project_root
@@ -50,19 +36,7 @@ def get_project_root():
 
 
 def get_data_paths(base_dir='data'):
-    """
-    Get paths to data directories and files relative to project root.
-
-    Parameters
-    ----------
-    base_dir : str
-        Base data directory relative to project root
-
-    Returns
-    -------
-    dict
-        Dictionary of data paths
-    """
+    """Get paths to data directories and files relative to project root."""
     # Get project root and make all paths relative to it
     project_root = get_project_root()
     base_path = os.path.join(project_root, base_dir)
@@ -83,19 +57,7 @@ def get_data_paths(base_dir='data'):
 
 
 def get_output_paths(base_dir='docs/images'):
-    """
-    Get paths to output directories and files relative to project root.
-
-    Parameters
-    ----------
-    base_dir : str
-        Base output directory relative to project root
-
-    Returns
-    -------
-    dict
-        Dictionary of output paths
-    """
+    """Get paths to output directories and files relative to project root."""
     # Get project root and make all paths relative to it
     project_root = get_project_root()
     base_path = os.path.join(project_root, base_dir)

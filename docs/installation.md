@@ -85,31 +85,21 @@ jupyter notebook
 # - Business sentiment indicators
 ```
 
-#### Option 2: Using Individual Scripts
+#### Option 2: Using Python Functions
 
-You can also run individual data collection scripts if preferred:
+You can also collect data programmatically using the package functions:
 
-```bash
-# Fetch FRED data
-python src/fetch_fred_data.py
+```python
+from econ_downturn import get_fred_data, get_nber_data, get_umich_data, get_all_data
 
-# Fetch NBER recession data
-python src/fetch_nber_data.py
+# Fetch individual data sources
+fred_data = get_fred_data(api_key='your_api_key')
+nber_data = get_nber_data()
+umich_data = get_umich_data(api_key='your_api_key')
 
-# Fetch University of Michigan Consumer Sentiment data
-python src/fetch_umich_data.py
+# Or fetch all data sources at once
+merged_data = get_all_data()
 ```
-
-#### Option 2: Using Sample Data (For Development/Testing)
-
-If you don't have a FRED API key or want to quickly test the pipeline, you can generate synthetic data:
-
-```bash
-# Generate sample data
-python src/generate_sample_data.py
-```
-
-This will create synthetic economic indicators that mimic the structure of real data, allowing you to test the analysis pipeline without requiring API access.
 
 ### 6. Launch Jupyter Notebook
 
@@ -127,14 +117,19 @@ Navigate to the `notebooks` directory to access the analysis notebooks.
   - `umich/`: University of Michigan Consumer Sentiment data
   - `processed/`: Processed datasets for analysis
 - `notebooks/`: Jupyter notebooks for analysis
+  - `00_data_collection.ipynb`: Comprehensive data collection from all sources
   - `01_data_exploration.ipynb`: Data exploration and visualization
   - `02_feature_engineering.ipynb`: Feature engineering and preprocessing
   - `03_multiple_discriminant_analysis.ipynb`: MDA modeling and evaluation
+  - `04_combined_data_analysis.ipynb`: Complete analysis with all data sources
+  - `05_feature_engineering_optimization.ipynb`: Advanced feature engineering
 - `src/`: Python modules and scripts
   - `econ_downturn/`: Main package with all functionality
-  - `fetch_fred_data.py`: Script to fetch data from FRED API
-  - `fetch_nber_data.py`: Script to fetch NBER recession data
-  - `fetch_umich_data.py`: Script to fetch UMich Consumer Sentiment data
+    - `data/`: Data fetching and processing modules
+    - `features/`: Feature engineering modules
+    - `models/`: Modeling and analysis modules
+    - `visualization/`: Data visualization modules
+    - `scripts/`: Utility scripts for training and monitoring
 - `docs/`: Project documentation
 
 ## Troubleshooting

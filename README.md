@@ -77,8 +77,7 @@ Our analytical approach encompassed:
     - `features/`: Feature engineering modules
     - `models/`: Modeling and analysis modules
     - `visualization/`: Data visualization modules
-  - `examples/`: Example scripts demonstrating package usage
-    - `run_analysis.py`: Complete analysis pipeline example
+    - `scripts/`: Utility scripts for training and monitoring
 - `docs/`: Project documentation
   - `installation.md`: Setup instructions
   - `data_dictionary.md`: Description of datasets and variables

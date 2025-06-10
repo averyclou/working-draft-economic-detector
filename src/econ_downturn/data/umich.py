@@ -17,10 +17,7 @@ logger = logging.getLogger(__name__)
 # Define UMich sentiment indicators available from FRED
 UMICH_INDICATORS = {
     'SENTIMENT': 'UMCSENT',     # University of Michigan: Consumer Sentiment
-    'CURRENT': 'UMCURRENT',     # University of Michigan: Current Economic Conditions
-    'EXPECTED': 'UMEXPECT',     # University of Michigan: Consumer Expectations
-    'INFLATION_1Y': 'MICH1YR',  # University of Michigan: Inflation Expectation (1-Year)
-    'INFLATION_5Y': 'MICH5YR'   # University of Michigan: Inflation Expectation (5-Year)
+    'INFLATION_EXPECTATION': 'MICH'  # University of Michigan: Inflation Expectation
 }
 
 

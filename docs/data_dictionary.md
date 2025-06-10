@@ -30,10 +30,7 @@ This document provides descriptions of the economic indicators and datasets used
 | Variable | FRED Series ID | Description | Frequency | Units |
 |----------|---------------|-------------|-----------|-------|
 | SENTIMENT | UMCSENT | University of Michigan: Consumer Sentiment | Monthly | Index 1966:Q1=100 |
-| CURRENT | UMCURRENT | University of Michigan: Current Economic Conditions | Monthly | Index 1966:Q1=100 |
-| EXPECTED | UMEXPECT | University of Michigan: Consumer Expectations | Monthly | Index 1966:Q1=100 |
-| INFLATION_1Y | MICH1YR | University of Michigan: Inflation Expectation (1-Year) | Monthly | Percent |
-| INFLATION_5Y | MICH5YR | University of Michigan: Inflation Expectation (5-Year) | Monthly | Percent |
+| INFLATION_EXPECTATION | MICH | University of Michigan: Inflation Expectation | Monthly | Percent |
 
 ## Additional Sentiment Data: Conference Board Consumer Confidence
 
